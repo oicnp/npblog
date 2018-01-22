@@ -5,16 +5,17 @@ extern crate npblog;
 
 use sapper::{SapperApp, SapperAppShell, Request, Response, Result as SapperResult};
 use self::npblog::controllers::{SiteController};
+use self::npblog::utils::{ WebContext, get_identity_and_web_context};
 
 
 struct BlogApp;
 
 impl SapperAppShell for BlogApp {
-    fn before(&self, _req: &mut Request) -> SapperResult<()> {
-        // sapper_std::init(req, Some("forustm_session"))?;
-        // let (identity, web) = get_identity_and_web_context(req);
+    fn before(&self, req: &mut Request) -> SapperResult<()> {
+        sapper_std::init(req, Some("npblog_session"))?;
+        let (_identity, web) = get_identity_and_web_context(req);
         // req.ext_mut().insert::<Permissions>(identity);
-        // req.ext_mut().insert::<WebContext>(web);
+        req.ext_mut().insert::<WebContext>(web);
         Ok(())
     }
 
@@ -37,7 +38,7 @@ fn main() {
         }))
         .with_shell(Box::new(BlogApp))
         .add_module(Box::new(SiteController));
-    
+
     app.static_service(true)
         .not_found_page(sapper_std::render("site/404.html", sapper_std::Context::new() ));
 
